@@ -32,10 +32,8 @@ const themes = {
 let bird, pipes, score, frame, running, gameReady, currentTheme = themes.default;
 let isTouchMode = false;
 
-// --- CRÉATION DES ÉLÉMENTS DANS LE DOM ---
+// Création des contrôles
 const mainContainer = document.getElementById('main-container');
-
-// Création de la barre de boutons
 const controlsDiv = document.createElement('div');
 controlsDiv.className = "controls-bar";
 controlsDiv.innerHTML = `
@@ -44,30 +42,30 @@ controlsDiv.innerHTML = `
 `;
 mainContainer.appendChild(controlsDiv);
 
-// Création du bouton de saut mobile
 const jumpBtn = document.createElement('button');
 jumpBtn.id = "mobileJumpBtn";
 jumpBtn.innerText = "FLAP !";
 mainContainer.appendChild(jumpBtn);
 
 function init() {
-    canvas.width = 320; canvas.height = 440;
-    bird = { x: 70, y: 220, vy: 0, r: 13 };
+    canvas.width = 360;  // Nouvelle largeur
+    canvas.height = 500; // Nouvelle hauteur
+    bird = { x: 70, y: 250, vy: 0, r: 13 };
     pipes = []; score = 0; frame = 0; running = false; gameReady = false;
     document.getElementById('score').textContent = '0';
 }
 
 function update() {
     if (!running || !gameReady) return;
-    frame++; bird.vy += 0.30; bird.y += bird.vy;
+    frame++; bird.vy += 0.32; bird.y += bird.vy;
 
-    if (frame % 130 === 0) {
+    if (frame % 120 === 0) {
         let h = 50 + Math.random() * (canvas.height - 180 - 120);
         pipes.push({ x: canvas.width, y: h, scored: false });
     }
 
     pipes.forEach(p => {
-        p.x -= 2.5;
+        p.x -= 2.8;
         if (bird.x + 10 > p.x && bird.x - 10 < p.x + 50) {
             if (bird.y - 10 < p.y || bird.y + 10 > p.y + 170) endGame();
         }
@@ -79,20 +77,24 @@ function update() {
 }
 
 function draw() {
-    ctx.fillStyle = currentTheme.sky; ctx.fillRect(0, 0, 320, 440);
+    ctx.fillStyle = currentTheme.sky; ctx.fillRect(0, 0, canvas.width, canvas.height);
     pipes.forEach(p => {
         ctx.fillStyle = currentTheme.pipe; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
         ctx.fillRect(p.x, 0, 50, p.y); ctx.strokeRect(p.x, -2, 50, p.y + 2);
         ctx.fillRect(p.x, p.y + 170, 50, canvas.height); ctx.strokeRect(p.x, p.y + 170, 50, canvas.height);
     });
-    ctx.fillStyle = '#ded895'; ctx.fillRect(0, canvas.height - 40, 320, 40);
-    ctx.fillStyle = '#95e17a'; ctx.fillRect(0, canvas.height - 45, 320, 5);
-    ctx.save(); ctx.translate(bird.x, bird.y); ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/8, bird.vy * 0.1)));
+    ctx.fillStyle = '#ded895'; ctx.fillRect(0, canvas.height - 40, canvas.width, 40);
+    ctx.fillStyle = '#95e17a'; ctx.fillRect(0, canvas.height - 45, canvas.width, 5);
+    
+    ctx.save(); 
+    ctx.translate(bird.x, bird.y); 
+    ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/8, bird.vy * 0.1)));
     ctx.fillStyle = currentTheme.bird; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(8, -4, 2, 0, Math.PI*2); ctx.fill(); 
     ctx.restore();
+
     update();
     requestAnimationFrame(draw);
 }
@@ -113,7 +115,6 @@ function endGame() {
             } else {
                 database.ref(path).push({ name: currentPlayer, score: Number(score), date: Date.now() });
             }
-            displayLeaderboard();
         });
     }
 }
@@ -121,7 +122,6 @@ function endGame() {
 function displayLeaderboard() {
     database.ref('games/FLAPPY_BIRD/scores').once('value', snap => {
         const val = snap.val();
-        // Tri manuel comme dans le Snake
         const list = val ? Object.values(val).sort((a, b) => b.score - a.score) : [];
         let html = "";
         list.slice(0, 10).forEach((s, i) => {
@@ -131,80 +131,42 @@ function displayLeaderboard() {
     });
 }
 
-// Logique Bouton TOP 10
-document.getElementById('toggleLeaderboard').onclick = () => {
-    const lb = document.getElementById('leaderboard-container');
-    lb.classList.toggle('hidden');
-    if (!lb.classList.contains('hidden')) displayLeaderboard();
+document.getElementById('toggleLeaderboard').onclick = (e) => {
+    e.stopPropagation();
+    document.getElementById('leaderboard-container').classList.remove('hidden');
+    displayLeaderboard();
 };
 
-// Logique Bouton Tactile
 document.getElementById('touchToggle').onclick = () => {
     isTouchMode = !isTouchMode;
     const btn = document.getElementById('touchToggle');
     const jump = document.getElementById('mobileJumpBtn');
-    if (isTouchMode) {
-        btn.innerText = "TACTILE: ON";
-        btn.style.background = "#39ff14";
-        jump.style.display = "block";
-    } else {
-        btn.innerText = "TACTILE: OFF";
-        btn.style.background = "#ff4444";
-        jump.style.display = "none";
-    }
+    btn.innerText = isTouchMode ? "TACTILE: ON" : "TACTILE: OFF";
+    btn.style.background = isTouchMode ? "#39ff14" : "#ff4444";
+    jump.style.display = isTouchMode ? "block" : "none";
 };
 
-// Event Saut (Bouton Mobile)
-jumpBtn.onmousedown = (e) => {
-    e.preventDefault();
-    if (running) { gameReady = true; bird.vy = -6; }
-};
-
-// Event Saut (Écran / Clavier)
+jumpBtn.onmousedown = (e) => { e.preventDefault(); if (running) { gameReady = true; bird.vy = -6.5; } };
 window.onmousedown = (e) => { 
     if (e.target.id === 'canvas' || e.target.id === 'overlay') {
-        if (running) { gameReady = true; bird.vy = -6; }
+        if (running) { gameReady = true; bird.vy = -6.5; }
     }
 };
-window.onkeydown = (e) => { if (e.code === 'Space') { gameReady = true; bird.vy = -6; } };
+window.onkeydown = (e) => { if (e.code === 'Space') { gameReady = true; bird.vy = -6.5; } };
 
-document.getElementById('startBtn').onclick = (e) => { e.stopPropagation(); init(); running = true; document.getElementById('overlay').classList.add('hidden'); };
+document.getElementById('startBtn').onclick = (e) => { 
+    e.stopPropagation(); 
+    init(); 
+    running = true; 
+    document.getElementById('overlay').classList.add('hidden'); 
+};
 
 document.querySelectorAll('.theme-option').forEach(opt => {
     opt.onclick = () => {
         document.querySelector('.theme-option.active').classList.remove('active');
-        opt.classList.add('active'); currentTheme = themes[opt.dataset.theme];
+        opt.classList.add('active'); 
+        currentTheme = themes[opt.dataset.theme];
     };
 });
 
-// Masquer le classement au démarrage
-document.getElementById('leaderboard-container').classList.add('hidden');
-
 init(); draw();
-// ... (garder tout le début du code inchangé)
-
-// Logique du bouton TOP 10 pour l'ouvrir
-document.getElementById('toggleLeaderboard').onclick = (e) => {
-    e.stopPropagation(); // Évite de faire sauter l'oiseau en cliquant
-    const lb = document.getElementById('leaderboard-container');
-    lb.classList.remove('hidden');
-    displayLeaderboard();
-};
-
-// Fonction de classement (Tri identique au Snake)
-function displayLeaderboard() {
-    database.ref('games/FLAPPY_BIRD/scores').once('value', snap => {
-        const val = snap.val();
-        const list = val ? Object.values(val).sort((a, b) => b.score - a.score) : [];
-        let html = "";
-        list.slice(0, 10).forEach((s, i) => {
-            html += `<div class="score-row">
-                        <span>#${i + 1} ${s.name}</span>
-                        <span class="player-score">${s.score} pts</span>
-                     </div>`;
-        });
-        document.getElementById('leaderboard').innerHTML = html || "Aucun score enregistré";
-    });
-}
-
-// ... (garder le reste du code pour le mode tactile et le jeu)
