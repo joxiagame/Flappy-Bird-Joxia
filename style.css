@@ -43,10 +43,20 @@ body {
 }
 .hidden { display: none !important; }
 
-/* --- Sélecteur Thèmes --- */
-#theme-selector { text-align: center; }
+/* --- Sélecteur Thèmes (CORRIGÉ POUR LE CENTRAGE) --- */
+#theme-selector { 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centre horizontalement le titre et les options */
+    text-align: center; 
+}
 #theme-selector h2 { font-size: 12px; color: #f77028; margin-bottom: 8px; letter-spacing: 1px; }
-.theme-options { display: flex; gap: 12px; }
+.theme-options { 
+    display: flex; 
+    gap: 12px; 
+    justify-content: center; /* Centre les pastilles à l'intérieur du flex */
+}
 .theme-option { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #444; cursor: pointer; transition: 0.2s; }
 .theme-option.active { border-color: white; box-shadow: 0 0 10px #f77028; transform: scale(1.1); }
 
