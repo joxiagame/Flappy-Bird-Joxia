@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Bird - Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="main-container">
+        <button id="backToHub">RETOUR AU HUB</button>
+
+        <div id="theme-selector">
+            <h2>THÈMES</h2>
+            <div class="theme-options">
+                <div class="theme-option active" data-theme="default" style="background: #70c5ce;"></div>
+                <div class="theme-option" data-theme="night" style="background: #2c3e50;"></div>
+                <div class="theme-option" data-theme="desert" style="background: #e67e22;"></div>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <canvas id="canvas"></canvas>
+            <div id="ui">
+                <div id="score">0</div>
+                <div id="overlay">
+                    <h1 id="title">Flappy Bird</h1>
+                    <div id="authContent">
+                        <button id="startBtn">DÉMARRER</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
