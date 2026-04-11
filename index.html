@@ -5,21 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Flappy Bird - Joxia Games</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
     <div id="access-denied" class="hidden">
         <h1>ACCÈS REFUSÉ</h1>
-        <p>Tu dois passer par le Hub pour jouer et enregistrer ton score.</p>
-        <button onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">RETOUR AU HUB</button>
+        <p>Connecte-toi via le Hub pour enregistrer tes scores.</p>
+        <button onclick="window.location.replace('https://joxiagame.github.io/Joxia-Games/')">RETOUR AU HUB</button>
     </div>
 
     <div id="game-content">
         <div class="user-bar">
-            <span>Joueur : <b id="topNavUser">Chargement...</b></span>
-            <button class="exit-btn" onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">QUITTER</button>
+            <span>Joueur : <b id="topNavUser">...</b></span>
+            <button class="exit-btn" onclick="window.location.replace('https://joxiagame.github.io/Joxia-Games/')">QUITTER</button>
         </div>
 
         <div id="main-container">
@@ -38,17 +38,15 @@
                 <div id="ui">
                     <div id="score">0</div>
                     <div id="overlay">
-                        <h1 id="title">Flappy Bird</h1>
+                        <h1>Flappy Bird</h1>
                         <button id="startBtn">DÉMARRER</button>
                     </div>
                 </div>
             </div>
 
             <div id="leaderboard-container">
-                <h2>TOP 10 JOUEURS</h2>
-                <div id="leaderboard">
-                    <p>Chargement du classement...</p>
-                </div>
+                <h2>CLASSEMENT TOP 10</h2>
+                <div id="leaderboard">Chargement...</div>
             </div>
         </div>
     </div>
