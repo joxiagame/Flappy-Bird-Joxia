@@ -14,7 +14,6 @@ const database = firebase.database();
 const urlParams = new URLSearchParams(window.location.search);
 const currentPlayer = urlParams.get('player');
 
-// VERIFICATION CONNEXION : Si pas de joueur, on affiche l'écran rouge et on stop
 if (!currentPlayer || currentPlayer === "null") {
     document.getElementById('game-content').classList.add('hidden');
     document.getElementById('access-denied').classList.remove('hidden');
@@ -96,9 +95,18 @@ function endGame() {
             const val = snap.val();
             if (val) {
                 const key = Object.keys(val)[0];
-                if (score > val[key].score) database.ref(`${path}/${key}`).update({ score: score, date: Date.now() });
+                if (Number(score) > Number(val[key].score)) {
+                    database.ref(`${path}/${key}`).update({ 
+                        score: Number(score), 
+                        date: Date.now() 
+                    });
+                }
             } else {
-                database.ref(path).push({ name: currentPlayer, score: score, date: Date.now() });
+                database.ref(path).push({ 
+                    name: currentPlayer, 
+                    score: Number(score), 
+                    date: Date.now() 
+                });
             }
             displayLeaderboard();
         });
