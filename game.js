@@ -1,11 +1,11 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyCPecKQH6DURfYitjY4bXMeW0URLrcNnsI",
-  authDomain: "joxiahub-2928b.firebaseapp.com",
-  databaseURL: "https://joxiahub-2928b-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "joxiahub-2928b",
-  storageBucket: "joxiahub-2928b.firebasestorage.app",
-  messagingSenderId: "303698595695",
-  appId: "1:303698595695:web:5c99c2cb2a9ea88e36a29a"
+    apiKey: "AIzaSyCPecKQH6DURfYitjY4bXMeW0URLrcNnsI",
+    authDomain: "joxiahub-2928b.firebaseapp.com",
+    databaseURL: "https://joxiahub-2928b-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "joxiahub-2928b",
+    storageBucket: "joxiahub-2928b.firebasestorage.app",
+    messagingSenderId: "303698595695",
+    appId: "1:303698595695:web:5c99c2cb2a9ea88e36a29a"
 };
 
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
@@ -14,11 +14,13 @@ const database = firebase.database();
 const urlParams = new URLSearchParams(window.location.search);
 const currentPlayer = urlParams.get('player');
 
-// Vérification stricte de l'accès
+// VERIFICATION CONNEXION : Si pas de joueur, on affiche l'écran rouge et on stop
 if (!currentPlayer || currentPlayer === "null") {
     document.getElementById('game-content').classList.add('hidden');
     document.getElementById('access-denied').classList.remove('hidden');
 } else {
+    document.getElementById('access-denied').classList.add('hidden');
+    document.getElementById('game-content').classList.remove('hidden');
     document.getElementById('topNavUser').innerText = currentPlayer;
 }
 
@@ -43,7 +45,7 @@ function update() {
     if (!running || !gameReady) return;
     frame++; bird.vy += 0.30; bird.y += bird.vy;
 
-    if (frame % 140 === 0) {
+    if (frame % 130 === 0) {
         let h = 50 + Math.random() * (canvas.height - 180 - 120);
         pipes.push({ x: canvas.width, y: h, scored: false });
     }
@@ -88,7 +90,7 @@ function endGame() {
     running = false;
     document.getElementById('overlay').classList.remove('hidden');
 
-    if (score > 0 && currentPlayer) {
+    if (score > 0 && currentPlayer && currentPlayer !== "null") {
         const path = 'games/FLAPPY_BIRD/scores';
         database.ref(path).orderByChild('name').equalTo(currentPlayer).once('value', snap => {
             const val = snap.val();
