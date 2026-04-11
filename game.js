@@ -8,19 +8,19 @@ const firebaseConfig = {
     appId: "1:303698595695:web:5c99c2cb2a9ea88e36a29a"
 };
 
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+// Init Firebase avec sécurité Safari
+try {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+} catch (e) { console.error("Firebase Error:", e); }
 
+const database = firebase.database();
 const urlParams = new URLSearchParams(window.location.search);
 const currentPlayer = urlParams.get('player');
 
-// VERIFICATION CONNEXION : Si pas de joueur, on affiche l'écran rouge et on stop
 if (!currentPlayer || currentPlayer === "null") {
     document.getElementById('game-content').classList.add('hidden');
     document.getElementById('access-denied').classList.remove('hidden');
 } else {
-    document.getElementById('access-denied').classList.add('hidden');
-    document.getElementById('game-content').classList.remove('hidden');
     document.getElementById('topNavUser').innerText = currentPlayer;
 }
 
@@ -32,55 +32,43 @@ const themes = {
     forest:  { sky: '#27ae60', pipe: '#1e8449', bird: '#ecf0f1' }
 };
 
-let bird, pipes, score, frame, running, gameReady, currentTheme = themes.default;
+let bird, pipes, score, frame, running, currentTheme = themes.default;
 
 function init() {
     canvas.width = 320; canvas.height = 440;
     bird = { x: 70, y: 220, vy: 0, r: 13 };
-    pipes = []; score = 0; frame = 0; running = false; gameReady = false;
+    pipes = []; score = 0; frame = 0; running = false;
     document.getElementById('score').textContent = '0';
 }
 
 function update() {
-    if (!running || !gameReady) return;
-    frame++; bird.vy += 0.30; bird.y += bird.vy;
-
-    if (frame % 130 === 0) {
-        let h = 50 + Math.random() * (canvas.height - 180 - 120);
-        pipes.push({ x: canvas.width, y: h, scored: false });
+    if (!running) return;
+    frame++; bird.vy += 0.28; bird.y += bird.vy;
+    if (frame % 125 === 0) {
+        let h = 60 + Math.random() * 160;
+        pipes.push({ x: 320, y: h, scored: false });
     }
-
     pipes.forEach(p => {
-        p.x -= 2.5;
+        p.x -= 2.4;
         if (bird.x + 10 > p.x && bird.x - 10 < p.x + 50) {
-            if (bird.y - 10 < p.y || bird.y + 10 > p.y + 170) endGame();
+            if (bird.y - 10 < p.y || bird.y + 10 > p.y + 160) endGame();
         }
         if (!p.scored && p.x < bird.x) { p.scored = true; score++; document.getElementById('score').textContent = score; }
     });
-
     pipes = pipes.filter(p => p.x > -60);
-    if (bird.y > canvas.height - 45 || bird.y < 0) endGame();
+    if (bird.y > 440 || bird.y < 0) endGame();
 }
 
 function draw() {
     ctx.fillStyle = currentTheme.sky; ctx.fillRect(0, 0, 320, 440);
-    
     pipes.forEach(p => {
-        ctx.fillStyle = currentTheme.pipe; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
-        ctx.fillRect(p.x, 0, 50, p.y); ctx.strokeRect(p.x, -2, 50, p.y + 2);
-        ctx.fillRect(p.x, p.y + 170, 50, canvas.height); ctx.strokeRect(p.x, p.y + 170, 50, canvas.height);
+        ctx.fillStyle = currentTheme.pipe;
+        ctx.fillRect(p.x, 0, 50, p.y);
+        ctx.fillRect(p.x, p.y + 160, 50, 440);
     });
-
-    ctx.fillStyle = '#ded895'; ctx.fillRect(0, canvas.height - 40, 320, 40);
-    ctx.fillStyle = '#95e17a'; ctx.fillRect(0, canvas.height - 45, 320, 5);
-
-    ctx.save(); ctx.translate(bird.x, bird.y); ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/8, bird.vy * 0.1)));
-    ctx.fillStyle = currentTheme.bird; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(8, -4, 2, 0, Math.PI*2); ctx.fill(); 
-    ctx.restore();
-
+    ctx.fillStyle = currentTheme.bird;
+    ctx.beginPath(); ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(bird.x+5, bird.y-4, 4, 0, Math.PI*2); ctx.fill();
     update();
     requestAnimationFrame(draw);
 }
@@ -89,16 +77,15 @@ function endGame() {
     if (!running) return;
     running = false;
     document.getElementById('overlay').classList.remove('hidden');
-
-    if (score > 0 && currentPlayer && currentPlayer !== "null") {
+    if (score > 0 && currentPlayer) {
         const path = 'games/FLAPPY_BIRD/scores';
         database.ref(path).orderByChild('name').equalTo(currentPlayer).once('value', snap => {
-            const val = snap.val();
-            if (val) {
-                const key = Object.keys(val)[0];
-                if (score > val[key].score) database.ref(`${path}/${key}`).update({ score: score, date: Date.now() });
+            const data = snap.val();
+            if (data) {
+                const key = Object.keys(data)[0];
+                if (score > data[key].score) database.ref(`${path}/${key}`).update({ score: score });
             } else {
-                database.ref(path).push({ name: currentPlayer, score: score, date: Date.now() });
+                database.ref(path).push({ name: currentPlayer, score: score });
             }
             displayLeaderboard();
         });
@@ -107,18 +94,27 @@ function endGame() {
 
 function displayLeaderboard() {
     database.ref('games/FLAPPY_BIRD/scores').orderByChild('score').limitToLast(10).once('value', snap => {
-        let html = "", data = [];
-        snap.forEach(s => data.push(s.val()));
-        data.reverse().forEach((s, i) => {
-            html += `<div class="score-row"><span>#${i+1} ${s.name}</span><span class="player-score">${s.score} pts</span></div>`;
+        let html = "", res = [];
+        snap.forEach(s => res.push(s.val()));
+        res.reverse().forEach((s, i) => {
+            html += `<div class="score-row"><span>#${i+1} ${s.name}</span><b>${s.score}</b></div>`;
         });
-        document.getElementById('leaderboard').innerHTML = html || "Aucun score";
+        document.getElementById('leaderboard').innerHTML = html;
     });
 }
 
-document.getElementById('startBtn').onclick = (e) => { e.stopPropagation(); init(); running = true; document.getElementById('overlay').classList.add('hidden'); };
-window.onmousedown = (e) => { if(!e.target.classList.contains('exit-btn') && e.target.id !== 'startBtn') { gameReady = true; bird.vy = -6; } };
-window.onkeydown = (e) => { if(e.code === 'Space') { gameReady = true; bird.vy = -6; } };
+function handleAction(e) {
+    if (e.target.id === 'startBtn') return;
+    if (running) {
+        bird.vy = -5.5;
+        if (e.type === 'touchstart') e.preventDefault();
+    }
+}
+
+document.getElementById('startBtn').onclick = () => { init(); running = true; document.getElementById('overlay').classList.add('hidden'); };
+window.addEventListener('mousedown', handleAction);
+window.addEventListener('touchstart', handleAction, { passive: false });
+window.addEventListener('keydown', (e) => { if(e.code === 'Space') handleAction(e); });
 
 document.querySelectorAll('.theme-option').forEach(opt => {
     opt.onclick = () => {
