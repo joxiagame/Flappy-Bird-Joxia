@@ -10,19 +10,19 @@
 </head>
 <body>
 
-    <div class="user-bar">
-        <span>Joueur : <b id="topNavUser">Chargement...</b></span>
-        <button class="exit-btn" onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">QUITTER</button>
+    <div id="access-denied" class="hidden">
+        <h1>ACCÈS REFUSÉ</h1>
+        <p>Tu dois passer par le Hub pour jouer et enregistrer ton score.</p>
+        <button onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">RETOUR AU HUB</button>
     </div>
 
-    <div id="main-container">
-        <div id="access-denied" class="hidden">
-            <h1>ACCÈS REFUSÉ</h1>
-            <p>Tu dois passer par le Hub pour jouer.</p>
-            <button onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">RETOUR AU HUB</button>
+    <div id="game-content">
+        <div class="user-bar">
+            <span>Joueur : <b id="topNavUser">Chargement...</b></span>
+            <button class="exit-btn" onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">QUITTER</button>
         </div>
 
-        <div id="game-content">
+        <div id="main-container">
             <div id="theme-selector">
                 <h2>THÈMES</h2>
                 <div class="theme-options">
@@ -47,11 +47,12 @@
             <div id="leaderboard-container">
                 <h2>TOP 10 JOUEURS</h2>
                 <div id="leaderboard">
-                    <p>Chargement...</p>
+                    <p>Chargement du classement...</p>
                 </div>
             </div>
         </div>
     </div>
+
     <script src="game.js"></script>
 </body>
 </html>
