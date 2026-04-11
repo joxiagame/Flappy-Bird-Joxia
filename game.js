@@ -95,8 +95,7 @@ function endGame() {
             const val = snap.val();
             if (val) {
                 const key = Object.keys(val)[0];
-                // Comparaison forcée en nombre
-                if (Number(score) > Number(val[key].score)) {
+                if (score > val[key].score) {
                     database.ref(`${path}/${key}`).update({ 
                         score: Number(score), 
                         date: Date.now() 
@@ -109,39 +108,33 @@ function endGame() {
                     date: Date.now() 
                 });
             }
-            // Délai de 500ms pour laisser à Firebase le temps d'écrire avant de lire le classement
-            setTimeout(displayLeaderboard, 500);
+            displayLeaderboard();
         });
     }
 }
 
+// --- MODIFICATION : Logique du classement calquée sur le Snake ---
 function displayLeaderboard() {
-    // On récupère tout le noeud 'scores' sans filtre pour éviter les bugs d'indexation
     database.ref('games/FLAPPY_BIRD/scores').once('value', snap => {
+        const val = snap.val();
+        
+        // On transforme l'objet en liste et on trie du plus grand au plus petit (comme dans Snake)
+        const list = val ? Object.values(val).sort((a, b) => b.score - a.score) : [];
+        
         let html = "";
-        let scoresArray = [];
-
-        snap.forEach(childSnap => {
-            const data = childSnap.val();
-            scoresArray.push({
-                name: data.name,
-                score: Number(data.score) // On force le format nombre
-            });
-        });
-
-        // TRI MANUEL : Du plus grand au plus petit
-        scoresArray.sort((a, b) => b.score - a.score);
-
-        // AFFICHAGE : On prend les 10 meilleurs
-        scoresArray.slice(0, 10).forEach((s, i) => {
+        
+        // On affiche uniquement les 10 meilleurs
+        list.slice(0, 10).forEach((s, i) => {
             html += `<div class="score-row">
-                        <span>#${i+1} ${s.name}</span>
+                        <span>#${i + 1} ${s.name}</span>
                         <span class="player-score">${s.score} pts</span>
                      </div>`;
         });
 
-        const lb = document.getElementById('leaderboard');
-        if (lb) lb.innerHTML = html || "Aucun score";
+        const leaderboardDiv = document.getElementById('leaderboard');
+        if (leaderboardDiv) {
+            leaderboardDiv.innerHTML = html || "Aucun score";
+        }
     });
 }
 
