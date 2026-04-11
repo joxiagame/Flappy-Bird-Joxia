@@ -32,8 +32,10 @@ const themes = {
 let bird, pipes, score, frame, running, gameReady, currentTheme = themes.default;
 let isTouchMode = false;
 
-// Création des éléments de l'interface
+// --- CRÉATION DES ÉLÉMENTS DANS LE DOM ---
 const mainContainer = document.getElementById('main-container');
+
+// Création de la barre de boutons
 const controlsDiv = document.createElement('div');
 controlsDiv.className = "controls-bar";
 controlsDiv.innerHTML = `
@@ -42,6 +44,7 @@ controlsDiv.innerHTML = `
 `;
 mainContainer.appendChild(controlsDiv);
 
+// Création du bouton de saut mobile
 const jumpBtn = document.createElement('button');
 jumpBtn.id = "mobileJumpBtn";
 jumpBtn.innerText = "FLAP !";
@@ -57,10 +60,12 @@ function init() {
 function update() {
     if (!running || !gameReady) return;
     frame++; bird.vy += 0.30; bird.y += bird.vy;
+
     if (frame % 130 === 0) {
         let h = 50 + Math.random() * (canvas.height - 180 - 120);
         pipes.push({ x: canvas.width, y: h, scored: false });
     }
+
     pipes.forEach(p => {
         p.x -= 2.5;
         if (bird.x + 10 > p.x && bird.x - 10 < p.x + 50) {
@@ -68,6 +73,7 @@ function update() {
         }
         if (!p.scored && p.x < bird.x) { p.scored = true; score++; document.getElementById('score').textContent = score; }
     });
+
     pipes = pipes.filter(p => p.x > -60);
     if (bird.y > canvas.height - 45 || bird.y < 0) endGame();
 }
@@ -115,6 +121,7 @@ function endGame() {
 function displayLeaderboard() {
     database.ref('games/FLAPPY_BIRD/scores').once('value', snap => {
         const val = snap.val();
+        // Tri manuel comme dans le Snake
         const list = val ? Object.values(val).sort((a, b) => b.score - a.score) : [];
         let html = "";
         list.slice(0, 10).forEach((s, i) => {
@@ -124,24 +131,36 @@ function displayLeaderboard() {
     });
 }
 
-// Bouton Classement
+// Logique Bouton TOP 10
 document.getElementById('toggleLeaderboard').onclick = () => {
-    document.getElementById('leaderboard-container').classList.toggle('hidden');
-    displayLeaderboard();
+    const lb = document.getElementById('leaderboard-container');
+    lb.classList.toggle('hidden');
+    if (!lb.classList.contains('hidden')) displayLeaderboard();
 };
 
-// Bouton Tactile
+// Logique Bouton Tactile
 document.getElementById('touchToggle').onclick = () => {
     isTouchMode = !isTouchMode;
     const btn = document.getElementById('touchToggle');
-    const jBtn = document.getElementById('mobileJumpBtn');
-    btn.innerText = isTouchMode ? "TACTILE: ON" : "TACTILE: OFF";
-    btn.style.background = isTouchMode ? "#39ff14" : "#ff4444";
-    jBtn.style.display = isTouchMode ? "block" : "none";
+    const jump = document.getElementById('mobileJumpBtn');
+    if (isTouchMode) {
+        btn.innerText = "TACTILE: ON";
+        btn.style.background = "#39ff14";
+        jump.style.display = "block";
+    } else {
+        btn.innerText = "TACTILE: OFF";
+        btn.style.background = "#ff4444";
+        jump.style.display = "none";
+    }
 };
 
-// Actions de saut
-jumpBtn.onmousedown = (e) => { e.preventDefault(); if (running) { gameReady = true; bird.vy = -6; } };
+// Event Saut (Bouton Mobile)
+jumpBtn.onmousedown = (e) => {
+    e.preventDefault();
+    if (running) { gameReady = true; bird.vy = -6; }
+};
+
+// Event Saut (Écran / Clavier)
 window.onmousedown = (e) => { 
     if (e.target.id === 'canvas' || e.target.id === 'overlay') {
         if (running) { gameReady = true; bird.vy = -6; }
@@ -158,7 +177,7 @@ document.querySelectorAll('.theme-option').forEach(opt => {
     };
 });
 
-// Masquer au départ
+// Masquer le classement au démarrage
 document.getElementById('leaderboard-container').classList.add('hidden');
 
 init(); draw();
