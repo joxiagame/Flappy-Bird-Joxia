@@ -63,19 +63,23 @@ function update() {
 
 function draw() {
     ctx.fillStyle = currentTheme.sky; ctx.fillRect(0, 0, 320, 440);
+    
     pipes.forEach(p => {
         ctx.fillStyle = currentTheme.pipe; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
         ctx.fillRect(p.x, 0, 50, p.y); ctx.strokeRect(p.x, -2, 50, p.y + 2);
         ctx.fillRect(p.x, p.y + 170, 50, canvas.height); ctx.strokeRect(p.x, p.y + 170, 50, canvas.height);
     });
+
     ctx.fillStyle = '#ded895'; ctx.fillRect(0, canvas.height - 40, 320, 40);
     ctx.fillStyle = '#95e17a'; ctx.fillRect(0, canvas.height - 45, 320, 5);
+
     ctx.save(); ctx.translate(bird.x, bird.y); ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/8, bird.vy * 0.1)));
     ctx.fillStyle = currentTheme.bird; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
     ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(8, -4, 2, 0, Math.PI*2); ctx.fill(); 
     ctx.restore();
+
     update();
     requestAnimationFrame(draw);
 }
@@ -84,47 +88,67 @@ function endGame() {
     if (!running) return;
     running = false;
     document.getElementById('overlay').classList.remove('hidden');
+
     if (score > 0 && currentPlayer && currentPlayer !== "null") {
         const path = 'games/FLAPPY_BIRD/scores';
         database.ref(path).orderByChild('name').equalTo(currentPlayer).once('value', snap => {
             const val = snap.val();
             if (val) {
                 const key = Object.keys(val)[0];
+                // Comparaison forcée en nombre
                 if (Number(score) > Number(val[key].score)) {
-                    database.ref(`${path}/${key}`).update({ score: Number(score), date: Date.now() });
+                    database.ref(`${path}/${key}`).update({ 
+                        score: Number(score), 
+                        date: Date.now() 
+                    });
                 }
             } else {
-                database.ref(path).push({ name: currentPlayer, score: Number(score), date: Date.now() });
+                database.ref(path).push({ 
+                    name: currentPlayer, 
+                    score: Number(score), 
+                    date: Date.now() 
+                });
             }
-            displayLeaderboard();
+            // Délai de 500ms pour laisser à Firebase le temps d'écrire avant de lire le classement
+            setTimeout(displayLeaderboard, 500);
         });
     }
 }
 
 function displayLeaderboard() {
-    // On récupère tout pour être sûr de ne rien rater si l'index bug encore
+    // On récupère tout le noeud 'scores' sans filtre pour éviter les bugs d'indexation
     database.ref('games/FLAPPY_BIRD/scores').once('value', snap => {
-        let html = "", data = [];
-        snap.forEach(s => {
-            let user = s.val();
-            // On force le score en nombre pour le tri manuel
-            data.push({ name: user.name, score: Number(user.score) });
+        let html = "";
+        let scoresArray = [];
+
+        snap.forEach(childSnap => {
+            const data = childSnap.val();
+            scoresArray.push({
+                name: data.name,
+                score: Number(data.score) // On force le format nombre
+            });
         });
-        
-        // Tri manuel du plus grand au plus petit (au cas où l'index Firebase n'est pas prêt)
-        data.sort((a, b) => b.score - a.score);
-        
-        // On ne garde que les 10 premiers
-        data.slice(0, 10).forEach((s, i) => {
-            html += `<div class="score-row"><span>#${i+1} ${s.name}</span><span class="player-score">${s.score} pts</span></div>`;
+
+        // TRI MANUEL : Du plus grand au plus petit
+        scoresArray.sort((a, b) => b.score - a.score);
+
+        // AFFICHAGE : On prend les 10 meilleurs
+        scoresArray.slice(0, 10).forEach((s, i) => {
+            html += `<div class="score-row">
+                        <span>#${i+1} ${s.name}</span>
+                        <span class="player-score">${s.score} pts</span>
+                     </div>`;
         });
-        document.getElementById('leaderboard').innerHTML = html || "Aucun score";
+
+        const lb = document.getElementById('leaderboard');
+        if (lb) lb.innerHTML = html || "Aucun score";
     });
 }
 
 document.getElementById('startBtn').onclick = (e) => { e.stopPropagation(); init(); running = true; document.getElementById('overlay').classList.add('hidden'); };
 window.onmousedown = (e) => { if(!e.target.classList.contains('exit-btn') && e.target.id !== 'startBtn') { gameReady = true; bird.vy = -6; } };
 window.onkeydown = (e) => { if(e.code === 'Space') { gameReady = true; bird.vy = -6; } };
+
 document.querySelectorAll('.theme-option').forEach(opt => {
     opt.onclick = () => {
         document.querySelector('.theme-option.active').classList.remove('active');
