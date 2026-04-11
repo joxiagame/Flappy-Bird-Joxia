@@ -1,185 +1,64 @@
-/* Reset et Fond */
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    touch-action: none;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0; padding: 0; box-sizing: border-box;
+    touch-action: none; font-family: 'Segoe UI', sans-serif;
 }
 
 body {
     background: #1a1a1a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    overflow: hidden;
-    color: white;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; overflow-x: hidden; color: white;
 }
 
 #main-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 20px; padding: 60px 20px 20px 20px;
 }
 
-/* --- Bouton Retour Redessiné --- */
-#backToHub {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    padding: 12px 24px;
-    font-size: 16px;
-    background: #f77028; /* Même couleur que DÉMARRER */
-    color: white;
-    border: 3px solid white;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 4px 0 #a04010;
+/* Boutons style Flappy */
+#backToHub, #startBtn {
+    padding: 12px 25px; font-size: 18px; background: #f77028;
+    color: white; border: 3px solid white; cursor: pointer;
+    font-weight: bold; box-shadow: 0 4px 0 #a04010;
     transition: transform 0.1s, box-shadow 0.1s;
-    z-index: 100;
 }
 
-#backToHub:hover {
-    background: #e06020;
-}
+#backToHub { position: absolute; top: 15px; left: 15px; font-size: 14px; }
+#backToHub:active, #startBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 #a04010; }
 
-#backToHub:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 0 #a04010;
-}
+/* Sélecteur Thèmes */
+#theme-selector { text-align: center; }
+#theme-selector h2 { font-size: 14px; color: #f77028; margin-bottom: 8px; }
+.theme-options { display: flex; gap: 10px; }
+.theme-option { width: 30px; height: 30px; border-radius: 5px; border: 2px solid #555; cursor: pointer; }
+.theme-option.active { border-color: white; box-shadow: 0 0 8px #f77028; }
 
-/* --- Sélecteur de Thèmes --- */
-#theme-selector {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 15px;
-    border-radius: 10px;
-    border: 2px solid #333;
-    text-align: center;
-    z-index: 100;
-}
-
-#theme-selector h2 {
-    font-size: 18px;
-    margin-bottom: 10px;
-    color: #f77028;
-    text-transform: uppercase;
-}
-
-.theme-options {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-}
-
-.theme-option {
-    width: 40px;
-    height: 40px;
-    border-radius: 5px;
-    border: 3px solid #555;
-    cursor: pointer;
-    transition: border-color 0.2s, transform 0.2s;
-}
-
-.theme-option:hover {
-    transform: scale(1.1);
-}
-
-.theme-option.active {
-    border-color: #f77028;
-    box-shadow: 0 0 10px rgba(247, 112, 40, 0.5);
-}
-
-/* --- Zone de Jeu Réduite --- */
+/* Fenêtre de jeu réduite */
 #game-area {
-    position: relative;
-    width: 320px; /* Largeur réduite */
-    height: 480px; /* Hauteur réduite */
-    background: #70c5ce; /* Couleur par défaut */
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    overflow: hidden;
-    border: 5px solid #333;
-    transition: background 0.3s;
+    position: relative; width: 320px; height: 480px;
+    background: #70c5ce; border-radius: 10px;
+    overflow: hidden; border: 4px solid #333;
 }
 
-#canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* UI et Overlay (adaptés à la zone réduite) */
-#ui {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-
-#score {
-    position: absolute;
-    top: 30px;
-    width: 100%;
-    text-align: center;
-    font-size: 50px;
-    color: white;
-    font-weight: 900;
-    text-shadow: 3px 3px 0 #000;
-    z-index: 10;
-}
+#canvas { width: 100%; height: 100%; display: block; }
+#ui { position: absolute; inset: 0; pointer-events: none; }
+#score { position: absolute; top: 20px; width: 100%; text-align: center; font-size: 40px; font-weight: 900; text-shadow: 2px 2px 0 #000; z-index: 10; }
 
 #overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    pointer-events: all;
+    position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: all;
 }
+#overlay.hidden { display: none; }
+#title { margin-bottom: 20px; text-shadow: 2px 2px 0 #000; }
 
-#overlay.hidden {
-    display: none;
+/* Leaderboard Néon */
+#leaderboard-container {
+    width: 320px; background: rgba(0,0,0,0.8);
+    border: 2px solid #06D6A0; border-radius: 10px; padding: 15px;
 }
-
-#title {
-    color: white;
-    font-size: 24px;
-    text-transform: uppercase;
-    margin-bottom: 15px;
-    text-shadow: 2px 2px 0 #000;
+#leaderboard-container h2 { color: #06D6A0; text-align: center; font-size: 16px; margin-bottom: 10px; }
+.score-row {
+    display: flex; justify-content: space-between;
+    padding: 5px 0; border-bottom: 1px solid #222; font-size: 14px;
 }
-
-#startBtn {
-    padding: 12px 30px;
-    font-size: 18px;
-    background: #f77028;
-    color: white;
-    border: 3px solid white;
-    cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 4px 0 #a04010;
-    transition: transform 0.1s, box-shadow 0.1s;
-}
-
-#startBtn:hover {
-    background: #e06020;
-}
-
-#startBtn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 0 #a04010;
-}
-
-/* Thèmes Visuels (pour JS) */
-.theme-night #game-area { background: #2c3e50; }
-.theme-desert #game-area { background: #e67e22; }
+.rank { color: #06D6A0; font-weight: bold; }
+.player-score { color: #FFD166; }
