@@ -1,4 +1,4 @@
-// --- CONFIGURATION FIREBASE ---
+// --- CONFIGURATION FIREBASE INTÉGRÉE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCPecKQH6DURfYitjY4bXMeW0URLrcNnsI",
   authDomain: "joxiahub-2928b.firebaseapp.com",
@@ -10,7 +10,10 @@ const firebaseConfig = {
   measurementId: "G-8CPTFVGM5E"
 };
 
-if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+// Initialisation (version compat)
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const database = firebase.database();
 
 // --- SÉCURITÉ ACCÈS HUB ---
@@ -18,9 +21,11 @@ const urlParams = new URLSearchParams(window.location.search);
 const currentPlayer = urlParams.get('player');
 
 if (!currentPlayer) {
+    // Bloque le jeu si pas de pseudo
     document.getElementById('game-content').classList.add('hidden');
     document.getElementById('access-denied').classList.remove('hidden');
 } else {
+    // Affiche le pseudo dans la barre user
     document.getElementById('topNavUser').innerText = currentPlayer;
 }
 
@@ -75,12 +80,17 @@ function update() {
 }
 
 function draw() {
+    // Ciel
     ctx.fillStyle = currentTheme.sky; ctx.fillRect(0, 0, 320, 480);
+    
+    // Tuyaux
     pipes.forEach(p => {
         ctx.fillStyle = currentTheme.pipe; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
         ctx.fillRect(p.x, 0, 50, p.y); ctx.strokeRect(p.x, -2, 50, p.y + 2);
         ctx.fillRect(p.x, p.y + PIPE_GAP, 50, canvas.height); ctx.strokeRect(p.x, p.y + PIPE_GAP, 50, canvas.height);
     });
+    
+    // Sol
     ctx.fillStyle = '#ded895'; ctx.fillRect(0, canvas.height - 50, 320, 50);
     ctx.fillStyle = '#95e17a'; ctx.fillRect(0, canvas.height - 55, 320, 5);
     
@@ -88,7 +98,9 @@ function draw() {
     ctx.save(); ctx.translate(bird.x, bird.y); ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/8, bird.vy * 0.1)));
     ctx.fillStyle = currentTheme.bird; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Oeil blanc
     ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    // Pupille noire
     ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(8, -4, 2, 0, Math.PI*2); ctx.fill(); 
     ctx.restore();
 
@@ -98,12 +110,16 @@ function draw() {
 function endGame() {
     if (!running) return; running = false;
     document.getElementById('overlay').classList.remove('hidden');
+    
+    // Envoi du score si réel et joueur présent
     if (score > 0 && currentPlayer) {
+        // Chemin spécifique pour Flappy
         database.ref('games/FLAPPY_BIRD/scores').push({ 
             name: currentPlayer, 
             score: score, 
             date: Date.now() 
-        }).then(() => displayLeaderboard());
+        }).then(() => displayLeaderboard())
+          .catch(e => console.error("Erreur Firebase:", e));
     }
 }
 
@@ -118,6 +134,7 @@ function displayLeaderboard() {
     });
 }
 
+// Contrôles
 document.getElementById('startBtn').onclick = (e) => { 
     e.stopPropagation(); init(); running = true; 
     document.getElementById('overlay').classList.add('hidden'); 
@@ -130,6 +147,7 @@ window.onmousedown = (e) => {
 };
 window.onkeydown = (e) => { if(e.code === 'Space') { gameReady = true; bird.vy = FLAP; } };
 
+// Gestion Thèmes
 document.querySelectorAll('.theme-option').forEach(opt => {
     opt.onclick = () => {
         document.querySelector('.theme-option.active').classList.remove('active');
