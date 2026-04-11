@@ -1,96 +1,41 @@
-* {
-    margin: 0; padding: 0; box-sizing: border-box;
-    touch-action: none; font-family: 'Segoe UI', sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; font-family: 'Segoe UI', sans-serif; }
+body { background: #1a1a1a; display: flex; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; color: white; }
 
-body {
-    background: #1a1a1a;
-    display: flex; align-items: center; justify-content: center;
-    min-height: 100vh; overflow-x: hidden; color: white;
-}
+#main-container { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 60px 20px 10px 20px; }
 
-#main-container {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 20px; padding: 80px 20px 20px 20px;
-}
-
-/* --- Barre Utilisateur avec Contour ORANGE --- */
+/* Barre Utilisateur Orange Néon */
 .user-bar {
-    position: fixed; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.9);
-    padding: 10px 20px; border-radius: 50px; 
-    border: 2px solid #f77028;
-    display: flex; align-items: center; gap: 15px; color: white; z-index: 1000;
+    position: fixed; top: 15px; right: 15px; background: rgba(0, 0, 0, 0.9);
+    padding: 8px 18px; border-radius: 50px; border: 2px solid #f77028;
+    display: flex; align-items: center; gap: 12px; z-index: 1000;
     box-shadow: 0 0 10px rgba(247, 112, 40, 0.4);
 }
 .user-bar b { color: #f77028; text-shadow: 0 0 5px #f77028; }
+.exit-btn { background: #ff4444; border: none; color: white; padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 10px; font-weight: bold; }
 
-.exit-btn {
-    background: #ff4444; border: none; color: white; 
-    padding: 5px 12px; border-radius: 20px; cursor: pointer; 
-    font-size: 10px; font-weight: bold; text-transform: uppercase;
-}
+/* Sélecteur Thèmes corrigé pour ne pas déborder */
+#theme-selector { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; }
+#theme-selector h2 { font-size: 11px; color: #f77028; margin-bottom: 5px; letter-spacing: 1px; }
+.theme-options { display: flex; gap: 10px; justify-content: center; }
+.theme-option { width: 30px; height: 30px; border-radius: 50%; border: 2px solid #444; cursor: pointer; transition: 0.2s; }
+.theme-option.active { border-color: white; box-shadow: 0 0 8px #f77028; transform: scale(1.1); }
 
-/* --- Écran de blocage --- */
-#access-denied {
-    position: fixed; inset: 0; background: #1a1a1a;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    z-index: 9999; text-align: center; gap: 20px;
-}
-#access-denied h1 { color: #ff4444; font-size: 40px; }
-#access-denied button { 
-    padding: 15px 30px; background: #f77028; color: white; 
-    border: none; border-radius: 10px; font-weight: bold; cursor: pointer;
-}
-.hidden { display: none !important; }
-
-/* --- Sélecteur Thèmes (CORRIGÉ POUR LE CENTRAGE) --- */
-#theme-selector { 
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centre horizontalement le titre et les options */
-    text-align: center; 
-}
-#theme-selector h2 { font-size: 12px; color: #f77028; margin-bottom: 8px; letter-spacing: 1px; }
-.theme-options { 
-    display: flex; 
-    gap: 12px; 
-    justify-content: center; /* Centre les pastilles à l'intérieur du flex */
-}
-.theme-option { width: 35px; height: 35px; border-radius: 50%; border: 2px solid #444; cursor: pointer; transition: 0.2s; }
-.theme-option.active { border-color: white; box-shadow: 0 0 10px #f77028; transform: scale(1.1); }
-
-/* --- Fenêtre de jeu --- */
-#game-area {
-    position: relative; width: 320px; height: 480px;
-    border-radius: 15px; overflow: hidden; border: 4px solid #333;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-
+/* Zone de jeu */
+#game-area { position: relative; width: 320px; height: 440px; border-radius: 12px; overflow: hidden; border: 4px solid #333; box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
 #canvas { width: 100%; height: 100%; display: block; }
-#score { position: absolute; top: 20px; width: 100%; text-align: center; font-size: 50px; font-weight: 900; text-shadow: 3px 3px 0 #000; z-index: 10; }
+#score { position: absolute; top: 15px; width: 100%; text-align: center; font-size: 45px; font-weight: 900; text-shadow: 3px 3px 0 #000; z-index: 10; }
 
-#overlay {
-    position: absolute; inset: 0; background: rgba(0,0,0,0.5);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: all;
-}
+#overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: all; }
 #overlay.hidden { display: none; }
-#title { margin-bottom: 20px; text-shadow: 2px 2px 0 #000; font-size: 26px; color: white; }
+#title { margin-bottom: 15px; text-shadow: 2px 2px 0 #000; font-size: 24px; color: white; }
+#startBtn { padding: 10px 25px; font-size: 16px; background: #f77028; color: white; border: 3px solid white; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #a04010; }
 
-#startBtn {
-    padding: 12px 30px; font-size: 18px; background: #f77028;
-    color: white; border: 3px solid white; cursor: pointer;
-    font-weight: bold; box-shadow: 0 4px 0 #a04010;
-}
-
-/* --- Classement --- */
-#leaderboard-container {
-    width: 320px; background: rgba(0,0,0,0.8);
-    border: 2px solid #06D6A0; border-radius: 10px; padding: 15px;
-}
-#leaderboard-container h2 { color: #06D6A0; text-align: center; font-size: 14px; margin-bottom: 10px; }
-.score-row {
-    display: flex; justify-content: space-between;
-    padding: 5px 0; border-bottom: 1px solid #222; font-size: 13px;
-}
+/* Classement */
+#leaderboard-container { width: 320px; background: rgba(0,0,0,0.8); border: 2px solid #06D6A0; border-radius: 10px; padding: 12px; margin-top: 5px; }
+#leaderboard-container h2 { color: #06D6A0; text-align: center; font-size: 13px; margin-bottom: 8px; }
+.score-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #222; font-size: 12px; }
 .player-score { color: #FFD166; font-weight: bold; }
+
+/* Blocage Hub */
+#access-denied { position: fixed; inset: 0; background: #1a1a1a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; text-align: center; gap: 20px; }
+.hidden { display: none !important; }
