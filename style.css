@@ -9,8 +9,8 @@ body { background: #1a1a1a; display: flex; align-items: flex-start; justify-cont
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    gap: 3px; /* Réduit pour gagner de la place */
-    padding-top: 5px; /* Presque collé au haut */
+    gap: 3px; 
+    padding-top: 5px; 
 }
 
 /* Barre utilisateur orange néon */
@@ -30,11 +30,11 @@ body { background: #1a1a1a; display: flex; align-items: flex-start; justify-cont
 .theme-option { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #444; cursor: pointer; transition: 0.2s; }
 .theme-option.active { border-color: white; box-shadow: 0 0 8px #f77028; transform: scale(1.1); }
 
-/* Zone de jeu - Taille fixe conservée */
+/* Zone de jeu AGRANDIE */
 #game-area { 
     position: relative; 
-    width: 320px; 
-    height: 420px; /* Légèrement réduit pour mobile */
+    width: 360px; 
+    height: 500px; 
     border-radius: 15px; 
     overflow: hidden; 
     border: 3px solid #333; 
@@ -48,28 +48,28 @@ body { background: #1a1a1a; display: flex; align-items: flex-start; justify-cont
 #title { margin-bottom: 15px; text-shadow: 2px 2px 0 #000; font-size: 24px; }
 #startBtn { padding: 10px 25px; font-size: 16px; background: #f77028; color: white; border: 2px solid white; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 #a04010; border-radius: 5px; }
 
-/* CLASSEMENT EN OVERLAY */
+/* CLASSEMENT EN OVERLAY INTERNE */
 #leaderboard-container { 
     position: absolute; 
     top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 280px; max-height: 350px; 
+    width: 300px; max-height: 400px; 
     background: rgba(0,0,0,0.95); border: 3px solid #06D6A0; border-radius: 15px; 
     padding: 12px; z-index: 100; overflow-y: auto;
 }
-#leaderboard-container h2 { color: #06D6A0; text-align: center; font-size: 15px; margin-bottom: 8px; }
-.score-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #333; font-size: 12px; }
+#leaderboard-container h2 { color: #06D6A0; text-align: center; font-size: 16px; margin-bottom: 8px; }
+.score-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #333; font-size: 13px; }
 .player-score { color: #FFD166; font-weight: bold; }
-.close-lb { width: 100%; margin-top: 10px; padding: 8px; background: #ff4444; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.close-lb { width: 100%; margin-top: 10px; padding: 10px; background: #ff4444; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-/* BARRE DE CONTRÔLES - Remontée juste sous le jeu */
-.controls-bar { display: flex; gap: 8px; margin-top: 5px; }
+/* BARRE DE CONTRÔLES */
+.controls-bar { display: flex; gap: 8px; margin-top: 5px; width: 360px; justify-content: center; }
 .btn-ui { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; text-transform: uppercase; }
 #toggleLeaderboard { background: #06D6A0; color: #000; }
 #touchToggle { background: #ff4444; color: #fff; }
 
-/* BOUTON TACTILE MOBILE - Plus compact */
+/* BOUTON TACTILE MOBILE */
 #mobileJumpBtn {
-    display: none; width: 320px; height: 60px; margin-top: 5px; 
+    display: none; width: 360px; height: 65px; margin-top: 5px; 
     background: #f77028; color: white; border: 3px solid white; border-radius: 15px; 
     font-size: 20px; font-weight: bold; box-shadow: 0 3px 0 #a04010; cursor: pointer;
 }
