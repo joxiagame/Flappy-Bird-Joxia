@@ -14,6 +14,7 @@ const database = firebase.database();
 const urlParams = new URLSearchParams(window.location.search);
 const currentPlayer = urlParams.get('player');
 
+// Vérification de sécurité
 if (!currentPlayer || currentPlayer === "null") {
     document.getElementById('game-content').classList.add('hidden');
     document.getElementById('access-denied').classList.remove('hidden');
@@ -32,7 +33,7 @@ const themes = {
 let bird, pipes, score, frame, running, gameReady, currentTheme = themes.default;
 let isTouchMode = false;
 
-// Création des contrôles
+// Création dynamique des éléments UI
 const mainContainer = document.getElementById('main-container');
 const controlsDiv = document.createElement('div');
 controlsDiv.className = "controls-bar";
@@ -48,8 +49,7 @@ jumpBtn.innerText = "FLAP !";
 mainContainer.appendChild(jumpBtn);
 
 function init() {
-    canvas.width = 360;  // Nouvelle largeur
-    canvas.height = 500; // Nouvelle hauteur
+    canvas.width = 360; canvas.height = 500;
     bird = { x: 70, y: 250, vy: 0, r: 13 };
     pipes = []; score = 0; frame = 0; running = false; gameReady = false;
     document.getElementById('score').textContent = '0';
@@ -91,8 +91,6 @@ function draw() {
     ctx.rotate(Math.min(Math.PI/4, Math.max(-Math.PI/8, bird.vy * 0.1)));
     ctx.fillStyle = currentTheme.bird; ctx.strokeStyle = '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(0, 0, bird.r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(6, -4, 5, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = "black"; ctx.beginPath(); ctx.arc(8, -4, 2, 0, Math.PI*2); ctx.fill(); 
     ctx.restore();
 
     update();
@@ -152,20 +150,15 @@ window.onmousedown = (e) => {
         if (running) { gameReady = true; bird.vy = -6.5; }
     }
 };
-window.onkeydown = (e) => { if (e.code === 'Space') { gameReady = true; bird.vy = -6.5; } };
 
 document.getElementById('startBtn').onclick = (e) => { 
-    e.stopPropagation(); 
-    init(); 
-    running = true; 
-    document.getElementById('overlay').classList.add('hidden'); 
+    e.stopPropagation(); init(); running = true; document.getElementById('overlay').classList.add('hidden'); 
 };
 
 document.querySelectorAll('.theme-option').forEach(opt => {
     opt.onclick = () => {
         document.querySelector('.theme-option.active').classList.remove('active');
-        opt.classList.add('active'); 
-        currentTheme = themes[opt.dataset.theme];
+        opt.classList.add('active'); currentTheme = themes[opt.dataset.theme];
     };
 });
 
