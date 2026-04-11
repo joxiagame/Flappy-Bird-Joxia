@@ -95,6 +95,7 @@ function endGame() {
             const val = snap.val();
             if (val) {
                 const key = Object.keys(val)[0];
+                // Correction : on force la comparaison numérique
                 if (Number(score) > Number(val[key].score)) {
                     database.ref(`${path}/${key}`).update({ 
                         score: Number(score), 
@@ -102,6 +103,7 @@ function endGame() {
                     });
                 }
             } else {
+                // Correction : premier enregistrement en format Nombre
                 database.ref(path).push({ 
                     name: currentPlayer, 
                     score: Number(score), 
@@ -114,6 +116,7 @@ function endGame() {
 }
 
 function displayLeaderboard() {
+    // Le tri Firebase nécessite des nombres pour fonctionner avec orderByChild
     database.ref('games/FLAPPY_BIRD/scores').orderByChild('score').limitToLast(10).once('value', snap => {
         let html = "", data = [];
         snap.forEach(s => data.push(s.val()));
