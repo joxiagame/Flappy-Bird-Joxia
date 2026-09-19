@@ -230,10 +230,10 @@ function loop(){
         }
         pipes.forEach(p=>{
             p.x -= cfg.speed;
-            // collision
+            // collision (ne PAS return : la boucle doit toujours atteindre requestAnimationFrame)
             const w=60;
             if (bird.x+bird.r-3 > p.x && bird.x-bird.r+3 < p.x+w){
-                if (bird.y-bird.r+2 < p.y || bird.y+bird.r-2 > p.y+cfg.gap) return die();
+                if (bird.y-bird.r+2 < p.y || bird.y+bird.r-2 > p.y+cfg.gap) die();
             }
             if (!p.scored && p.x+w < bird.x){
                 p.scored=true; score++; $('score').textContent=score;
@@ -241,7 +241,7 @@ function loop(){
             }
         });
         pipes = pipes.filter(p=>p.x>-70);
-        if (bird.y+bird.r > H-GROUND || bird.y-bird.r < 0) return die();
+        if (bird.y+bird.r > H-GROUND || bird.y-bird.r < 0) die();
     }
 
     pipes.forEach(drawPipe);
