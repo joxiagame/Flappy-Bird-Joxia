@@ -77,3 +77,16 @@ body { background: #1a1a1a; display: flex; align-items: flex-start; justify-cont
 }
 
 .hidden { display: none !important; }
+
+/* ===== Responsive mobile ===== */
+@media (max-width: 400px) {
+    #game-area {
+        width: min(360px, 94vw);
+        height: auto;
+        aspect-ratio: 360 / 500;
+    }
+    .controls-bar, #mobileJumpBtn { width: min(360px, 94vw); }
+    #main-container { width: 100%; }
+    .theme-option { width: 30px; height: 30px; }
+    .user-bar { top: 6px; right: 6px; padding: 5px 10px; font-size: 12px; }
+}

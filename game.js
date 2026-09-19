@@ -151,12 +151,26 @@ document.getElementById('touchToggle').onclick = () => {
     jump.style.display = isTouchMode ? "block" : "none";
 };
 
-jumpBtn.onmousedown = (e) => { e.preventDefault(); if (running) { gameReady = true; bird.vy = -6.5; } };
-window.onmousedown = (e) => { 
-    if (e.target.id === 'canvas' || e.target.id === 'overlay') {
-        if (running) { gameReady = true; bird.vy = -6.5; }
-    }
-};
+function flap() { if (running) { gameReady = true; bird.vy = -6.5; } }
+
+// Bouton FLAP dédié (souris + tactile)
+jumpBtn.addEventListener('mousedown', (e) => { e.preventDefault(); flap(); });
+jumpBtn.addEventListener('touchstart', (e) => { e.preventDefault(); flap(); }, { passive: false });
+
+// Tap direct sur la zone de jeu = voler (contrôle naturel Flappy Bird)
+const gameArea = document.getElementById('game-area');
+gameArea.addEventListener('mousedown', (e) => {
+    if (e.target.id === 'startBtn' || e.target.closest('#leaderboard-container')) return;
+    flap();
+});
+gameArea.addEventListener('touchstart', (e) => {
+    if (e.target.id === 'startBtn' || e.target.closest('#leaderboard-container')) return;
+    e.preventDefault(); // évite le double déclenchement (touch + mouse simulé) et le scroll
+    flap();
+}, { passive: false });
+
+// Barre d'espace pour le confort au clavier (desktop)
+window.addEventListener('keydown', (e) => { if (e.code === 'Space') { e.preventDefault(); flap(); } });
 
 document.getElementById('startBtn').onclick = (e) => { 
     e.stopPropagation(); init(); running = true; document.getElementById('overlay').classList.add('hidden'); 
