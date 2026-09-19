@@ -1,92 +1,162 @@
-/* RESET ET BASE */
-* { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; font-family: 'Segoe UI', sans-serif; }
-body { background: #1a1a1a; display: flex; align-items: flex-start; justify-content: center; min-height: 100vh; overflow: hidden; color: white; }
-
-#game-content { width: 100%; display: flex; flex-direction: column; align-items: center; }
-
-/* ÉCRAN ACCÈS REFUSÉ (Quand on ne passe pas par le hub) */
-#access-denied { 
-    position: fixed; inset: 0; background: #000; 
-    display: flex; flex-direction: column; align-items: center; justify-content: center; 
-    z-index: 9999; text-align: center; padding: 20px;
+/* ===================== Flappy Joxia ===================== */
+:root{
+    --orange:#f77028; --orange-d:#d65818; --gold:#ffcf4a;
+    --ink:#20242e; --sky1:#8fd3e6; --sky2:#c9edf6;
+    --panel:rgba(20,24,34,.82); --panel-b:rgba(255,255,255,.14);
+    --good:#2ecc71; --bad:#ff5a5a;
+    --r:18px; --shadow:0 12px 34px rgba(0,0,0,.35);
 }
-#access-denied h1 { color: #ff4444; font-size: 32px; text-shadow: 0 0 15px #ff4444; margin-bottom: 15px; }
-#access-denied p { color: #ccc; margin-bottom: 25px; line-height: 1.5; }
-#access-denied button { 
-    padding: 15px 30px; background: #ff4444; color: white; border: none; 
-    border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px;
-    box-shadow: 0 4px 0 #8b0000;
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+    font-family:'Nunito',system-ui,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #2b3550 0%, #171b26 55%, #0f121a 100%);
+    color:#fff; overflow:hidden; touch-action:none;
+    display:flex; align-items:center; justify-content:center; min-height:100dvh;
+    padding:env(safe-area-inset-top) 8px env(safe-area-inset-bottom);
 }
-#access-denied button:active { transform: translateY(2px); box-shadow: 0 2px 0 #8b0000; }
+.hidden{display:none !important;}
+.muted{color:#9aa3b2;}
 
-/* Conteneur principal */
-#main-container { display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 5px; }
+/* ---------- Accès refusé ---------- */
+#access-denied{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;padding:24px;}
+.ad-card{background:var(--panel);border:1px solid var(--panel-b);border-radius:24px;padding:34px 26px;text-align:center;max-width:340px;box-shadow:var(--shadow);backdrop-filter:blur(10px);}
+#access-denied h1{color:var(--bad);font-family:'Fredoka';font-size:26px;margin-bottom:12px;}
+#access-denied p{color:#c9cfda;line-height:1.5;margin-bottom:22px;}
+#access-denied button{padding:14px 26px;background:var(--orange);color:#fff;border:none;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 5px 0 var(--orange-d);}
+#access-denied button:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
 
-/* Barre utilisateur */
-.user-bar { 
-    position: fixed; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.9); 
-    padding: 6px 14px; border-radius: 50px; border: 2px solid #f77028; 
-    display: flex; align-items: center; gap: 8px; z-index: 1000; 
-    box-shadow: 0 0 10px rgba(247, 112, 40, 0.4);
+/* ---------- Layout ---------- */
+#game-content{width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+
+.topbar{width:min(400px,94vw);display:flex;gap:8px;align-items:center;}
+.pill{background:var(--panel);border:1px solid var(--panel-b);border-radius:50px;padding:8px 14px;font-weight:800;font-size:13px;display:flex;align-items:center;gap:6px;backdrop-filter:blur(8px);white-space:nowrap;}
+.coins-pill b{color:var(--gold);}
+.user-pill{color:#cdd4e0;overflow:hidden;text-overflow:ellipsis;}
+.user-pill b{color:var(--orange);max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.exit-btn{margin-left:auto;background:var(--bad);border-color:transparent;color:#fff;cursor:pointer;font-size:12px;}
+.exit-btn:active{transform:scale(.95);}
+
+/* ---------- Zone de jeu ---------- */
+#game-area{
+    position:relative; width:min(400px,94vw); aspect-ratio:360/560;
+    border-radius:24px; overflow:hidden;
+    border:3px solid rgba(255,255,255,.12);
+    box-shadow:var(--shadow);
+    background:linear-gradient(180deg,var(--sky1),var(--sky2));
 }
-.user-bar b { color: #f77028; text-shadow: 0 0 5px #f77028; }
-.exit-btn { background: #ff4444; border: none; color: white; padding: 3px 8px; border-radius: 20px; cursor: pointer; font-size: 9px; font-weight: bold; }
+#canvas{position:absolute;inset:0;width:100%;height:100%;display:block;}
 
-/* Thèmes compacts */
-#theme-selector { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 2px; }
-#theme-selector h2 { font-size: 10px; color: #f77028; margin-bottom: 3px; letter-spacing: 1px; }
-.theme-options { display: flex; gap: 8px; justify-content: center; }
-.theme-option { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #444; cursor: pointer; transition: 0.2s; }
-.theme-option.active { border-color: white; box-shadow: 0 0 8px #f77028; transform: scale(1.1); }
-
-/* Zone de jeu AGRANDIE */
-#game-area { 
-    position: relative; width: 360px; height: 500px; 
-    border-radius: 15px; overflow: hidden; border: 3px solid #333; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+/* HUD score */
+#hud{position:absolute;top:0;left:0;width:100%;pointer-events:none;z-index:6;}
+#score{
+    text-align:center;margin-top:14px;font-family:'Fredoka';font-weight:700;
+    font-size:52px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 18px rgba(0,0,0,.25);
+    opacity:0;transition:opacity .2s;
 }
-#canvas { width: 100%; height: 100%; display: block; }
-#score { position: absolute; top: 15px; width: 100%; text-align: center; font-size: 45px; font-weight: 900; text-shadow: 3px 3px 0 #000; z-index: 10; }
+#score.on{opacity:1;}
 
-#overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; }
-#title { margin-bottom: 15px; text-shadow: 2px 2px 0 #000; font-size: 24px; }
-#startBtn { padding: 10px 25px; font-size: 16px; background: #f77028; color: white; border: 2px solid white; cursor: pointer; font-weight: bold; box-shadow: 0 3px 0 #a04010; border-radius: 5px; }
+/* Compte à rebours */
+#countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:8;background:rgba(0,0,0,.15);}
+#cd-num{font-family:'Fredoka';font-size:110px;color:#fff;text-shadow:0 6px 0 rgba(0,0,0,.3);animation:pop .5s ease;}
+@keyframes pop{0%{transform:scale(.3);opacity:0;}60%{transform:scale(1.1);opacity:1;}100%{transform:scale(1);}}
 
-/* Classement Overlay */
-#leaderboard-container { 
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    width: 300px; max-height: 400px; background: rgba(0,0,0,0.95); 
-    border: 3px solid #06D6A0; border-radius: 15px; padding: 12px; z-index: 100; overflow-y: auto;
+/* ---------- Écrans (overlays glassy) ---------- */
+.screen{
+    position:absolute;inset:0;z-index:10;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    padding:22px 18px;text-align:center;
+    background:linear-gradient(180deg,rgba(15,18,26,.72),rgba(15,18,26,.86));
+    backdrop-filter:blur(6px);overflow-y:auto;
 }
-#leaderboard-container h2 { color: #06D6A0; text-align: center; font-size: 16px; margin-bottom: 8px; }
-.score-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #333; font-size: 13px; }
-.player-score { color: #FFD166; font-weight: bold; }
-.close-lb { width: 100%; margin-top: 10px; padding: 10px; background: #ff4444; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+.screen-title{font-family:'Fredoka';font-size:22px;}
 
-/* Barre de contrôles */
-.controls-bar { display: flex; gap: 8px; margin-top: 5px; width: 360px; justify-content: center; }
-.btn-ui { padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; text-transform: uppercase; }
-#toggleLeaderboard { background: #06D6A0; color: #000; }
-#touchToggle { background: #ff4444; color: #fff; }
+/* Logo */
+.logo{display:flex;flex-direction:column;line-height:.92;font-family:'Fredoka';font-weight:700;}
+.logo-flap{font-size:44px;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.3);letter-spacing:1px;}
+.logo-joxia{font-size:44px;color:var(--gold);text-shadow:0 4px 0 var(--orange-d);letter-spacing:1px;}
+.tagline{color:#cdd4e0;font-size:13px;margin-top:-4px;}
 
-/* Bouton Tactile */
-#mobileJumpBtn {
-    display: none; width: 360px; height: 65px; margin-top: 5px; 
-    background: #f77028; color: white; border: 3px solid white; border-radius: 15px; 
-    font-size: 20px; font-weight: bold; box-shadow: 0 3px 0 #a04010; cursor: pointer;
+/* Cartes de mode */
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;max-width:320px;}
+.mode-card{
+    background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);
+    border-radius:16px;padding:11px 8px;cursor:pointer;transition:.15s;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
 }
+.mode-card:active{transform:scale(.96);}
+.mode-card.sel{border-color:var(--gold);background:rgba(247,112,40,.22);box-shadow:0 0 0 3px rgba(255,207,74,.25);}
+.mode-emo{font-size:24px;}
+.mode-name{font-weight:900;font-size:14px;}
+.mode-desc{font-size:10.5px;color:#b9c0cd;line-height:1.15;}
 
-.hidden { display: none !important; }
+/* Boutons */
+.btn-main{
+    background:linear-gradient(180deg,#ff8a3c,var(--orange));color:#fff;border:none;
+    border-radius:16px;padding:15px 40px;font-family:'Fredoka';font-weight:700;font-size:20px;
+    cursor:pointer;box-shadow:0 6px 0 var(--orange-d),0 10px 22px rgba(0,0,0,.3);letter-spacing:.5px;
+}
+.btn-main:active{transform:translateY(4px);box-shadow:0 2px 0 var(--orange-d);}
+.menu-actions{display:flex;gap:10px;}
+.btn-ghost{
+    background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:#fff;
+    border-radius:13px;padding:11px 18px;font-weight:800;font-size:14px;cursor:pointer;transition:.15s;
+}
+.btn-ghost:active{transform:scale(.95);background:rgba(255,255,255,.18);}
+.best-line{font-size:13px;color:#cdd4e0;}
+.best-line b{color:var(--gold);}
+.close-x{margin-top:4px;}
 
-/* ===== Responsive mobile ===== */
-@media (max-width: 400px) {
-    #game-area {
-        width: min(360px, 94vw);
-        height: auto;
-        aspect-ratio: 360 / 500;
-    }
-    .controls-bar, #mobileJumpBtn { width: min(360px, 94vw); }
-    #main-container { width: 100%; }
-    .theme-option { width: 30px; height: 30px; }
-    .user-bar { top: 6px; right: 6px; padding: 5px 10px; font-size: 12px; }
+/* Boutique skins */
+.shop-coins{font-size:15px;font-weight:800;}
+.shop-coins b{color:var(--gold);}
+.skin-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%;max-width:330px;}
+.skin-card{
+    background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);border-radius:14px;
+    padding:10px 6px 8px;cursor:pointer;transition:.15s;display:flex;flex-direction:column;align-items:center;gap:5px;
+}
+.skin-card:active{transform:scale(.95);}
+.skin-card.sel{border-color:var(--gold);background:rgba(247,112,40,.2);}
+.skin-card.locked{opacity:.9;}
+.skin-prev{width:46px;height:46px;border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,.3);border:2px solid rgba(0,0,0,.25);}
+.skin-name{font-size:11px;font-weight:800;}
+.skin-tag{font-size:10.5px;font-weight:800;}
+.skin-tag.own{color:var(--good);}
+.skin-tag.buy{color:var(--gold);}
+.skin-tag.sel{color:#fff;}
+
+/* Classement */
+#leaderboard{width:100%;max-width:320px;max-height:52%;overflow-y:auto;}
+.score-row{display:flex;justify-content:space-between;padding:9px 10px;border-radius:10px;font-size:14px;font-weight:700;}
+.score-row:nth-child(odd){background:rgba(255,255,255,.06);}
+.score-row .rk{color:var(--gold);width:34px;}
+.score-row .nm{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.score-row .pts{color:var(--orange);font-weight:900;}
+
+/* Game over */
+.go-title{font-family:'Fredoka';font-size:34px;color:var(--bad);text-shadow:0 4px 0 rgba(0,0,0,.3);}
+.medal{font-size:64px;filter:drop-shadow(0 6px 10px rgba(0,0,0,.4));animation:pop .4s ease;}
+.go-scores{display:flex;gap:12px;}
+.go-box{background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:10px 20px;display:flex;flex-direction:column;gap:2px;}
+.go-box span{font-size:11px;color:#b9c0cd;}
+.go-box b{font-family:'Fredoka';font-size:26px;}
+.go-coins{font-size:17px;font-weight:800;}
+.go-coins b{color:var(--gold);}
+.go-actions{display:flex;flex-direction:column;gap:9px;align-items:center;}
+
+/* Bouton flap mobile */
+#flapBtn{
+    width:min(400px,94vw);padding:16px;border:none;border-radius:16px;cursor:pointer;
+    background:linear-gradient(180deg,#ff8a3c,var(--orange));color:#fff;
+    font-family:'Fredoka';font-weight:600;font-size:17px;box-shadow:0 5px 0 var(--orange-d);
+}
+#flapBtn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--orange-d);}
+
+/* Petits écrans */
+@media (max-height:720px){
+    .logo-flap,.logo-joxia{font-size:36px;}
+    #score{font-size:42px;}
+    .btn-main{padding:13px 34px;font-size:18px;}
+    .mode-desc{display:none;}
 }

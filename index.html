@@ -2,58 +2,102 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Flappy Bird - Joxia Games</title>
-    <link rel="stylesheet" href="style.css?v=2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Flappy Joxia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=3">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 </head>
 <body>
 
     <div id="access-denied" class="hidden">
-        <h1>ACCÈS REFUSÉ</h1>
-        <p>Tu dois passer par le Hub pour jouer et enregistrer ton score.</p>
-        <button onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">RETOUR AU HUB</button>
+        <div class="ad-card">
+            <h1>ACCÈS REFUSÉ</h1>
+            <p>Tu dois passer par le Hub pour jouer et enregistrer ton score.</p>
+            <button onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">RETOUR AU HUB</button>
+        </div>
     </div>
 
     <div id="game-content">
-        <div class="user-bar">
-            <span>Joueur : <b id="topNavUser">Chargement...</b></span>
-            <button class="exit-btn" onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">QUITTER</button>
+
+        <!-- Barre du haut -->
+        <div class="topbar">
+            <div class="pill coins-pill"><span class="coin-ico">🪙</span> <b id="coinCount">0</b></div>
+            <div class="pill user-pill">👤 <b id="topNavUser">…</b></div>
+            <button class="pill exit-btn" onclick="location.href='https://joxiagame.github.io/Joxia-Games/'">QUITTER</button>
         </div>
 
-        <div id="main-container">
-            <div id="theme-selector">
-                <h2>THÈMES</h2>
-                <div class="theme-options">
-                    <div class="theme-option active" data-theme="default" style="background: #70c5ce;"></div>
-                    <div class="theme-option" data-theme="night" style="background: #2c3e50;"></div>
-                    <div class="theme-option" data-theme="desert" style="background: #e67e22;"></div>
-                    <div class="theme-option" data-theme="forest" style="background: #27ae60;"></div>
-                </div>
+        <!-- Zone de jeu (canvas + overlays) -->
+        <div id="game-area">
+            <canvas id="canvas"></canvas>
+
+            <!-- HUD en jeu -->
+            <div id="hud">
+                <div id="score">0</div>
             </div>
 
-            <div id="game-area">
-                <canvas id="canvas"></canvas>
-                <div id="ui">
-                    <div id="score">0</div>
-                    <div id="overlay">
-                        <h1 id="title">Flappy Bird</h1>
-                        <button id="startBtn">DÉMARRER</button>
-                    </div>
+            <!-- Compte à rebours -->
+            <div id="countdown" class="hidden"><span id="cd-num">3</span></div>
+
+            <!-- ================= MENU ================= -->
+            <div id="menu" class="screen">
+                <div class="logo">
+                    <span class="logo-flap">FLAPPY</span>
+                    <span class="logo-joxia">JOXIA</span>
+                </div>
+                <p class="tagline">Choisis ton mode et envole-toi ✨</p>
+
+                <div class="mode-grid" id="modeGrid"><!-- injecté --></div>
+
+                <button id="playBtn" class="btn-main">▶ JOUER</button>
+
+                <div class="menu-actions">
+                    <button class="btn-ghost" id="shopBtn">🎨 Skins</button>
+                    <button class="btn-ghost" id="boardBtn">🏆 Classement</button>
                 </div>
 
-                <div id="leaderboard-container" class="hidden">
-                    <h2>TOP 10 JOUEURS</h2>
-                    <div id="leaderboard">
-                        <p>Chargement du classement...</p>
-                    </div>
-                    <button class="close-lb" onclick="document.getElementById('leaderboard-container').classList.add('hidden')">FERMER</button>
+                <div class="best-line">Meilleur (<span id="bestModeLabel">Classique</span>) : <b id="bestScore">0</b></div>
+            </div>
+
+            <!-- ================= BOUTIQUE SKINS ================= -->
+            <div id="shop" class="screen hidden">
+                <h2 class="screen-title">🎨 Boutique de skins</h2>
+                <div class="shop-coins">🪙 <b id="shopCoins">0</b> pièces</div>
+                <div class="skin-grid" id="skinGrid"><!-- injecté --></div>
+                <button class="btn-ghost close-x" data-close="shop">← Retour</button>
+            </div>
+
+            <!-- ================= CLASSEMENT ================= -->
+            <div id="board" class="screen hidden">
+                <h2 class="screen-title">🏆 Top 10 joueurs</h2>
+                <div id="leaderboard"><p class="muted">Chargement…</p></div>
+                <button class="btn-ghost close-x" data-close="board">← Retour</button>
+            </div>
+
+            <!-- ================= GAME OVER ================= -->
+            <div id="gameover" class="screen hidden">
+                <h2 class="go-title">GAME OVER</h2>
+                <div class="medal" id="medal">🥉</div>
+                <div class="go-scores">
+                    <div class="go-box"><span>Score</span><b id="finalScore">0</b></div>
+                    <div class="go-box"><span>Record</span><b id="finalBest">0</b></div>
+                </div>
+                <div class="go-coins">+<b id="earnedCoins">0</b> 🪙</div>
+                <div class="go-actions">
+                    <button id="retryBtn" class="btn-main">↻ Rejouer</button>
+                    <button id="menuBtn" class="btn-ghost">Menu</button>
                 </div>
             </div>
         </div>
+
+        <!-- Bouton flap mobile (grande zone tactile) -->
+        <button id="flapBtn" class="hidden">TAP pour voler 🐤</button>
+
     </div>
 
-    <script src="game.js?v=2"></script>
+    <script src="game.js?v=3"></script>
 </body>
 </html>
